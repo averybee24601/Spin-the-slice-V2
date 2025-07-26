@@ -4153,6 +4153,11 @@
         // Music player functionality
         function setupMusicPlayer() {
             const musicGrid = document.getElementById('musicGrid');
+            
+            // Debug: Log current location
+            console.log('Current page URL:', window.location.href);
+            console.log('Base URL:', window.location.origin + window.location.pathname);
+            
             const tracks = [
                 { name: "CO_CREATE", file: "BECKERBROSBEATS/CO_CREATE.mp3", artist: "Beckerbros" },
                 { name: "Liberty.exe", file: "BECKERBROSBEATS/Liberty.exe.mp3", artist: "Beckerbros" },
@@ -4160,6 +4165,17 @@
                 { name: "More than just a Job", file: "BECKERBROSBEATS/More than just a Job.mp3", artist: "Beckerbros" },
                 { name: "PROMPT__ _reclaim", file: "BECKERBROSBEATS/PROMPT__ _reclaim.mp3", artist: "Beckerbros" }
             ];
+            
+            // Debug: Test file accessibility
+            tracks.forEach(track => {
+                fetch(track.file, { method: 'HEAD' })
+                    .then(response => {
+                        console.log(`File ${track.file} status:`, response.status, response.statusText);
+                    })
+                    .catch(error => {
+                        console.error(`File ${track.file} not accessible:`, error);
+                    });
+            });
 
             let currentAudio = null;
             let currentCard = null;
@@ -4197,7 +4213,11 @@
                     if (currentAudio && currentCard === card) {
                         // Pause current track
                         if (currentAudio.paused) {
-                            currentAudio.play();
+                            currentAudio.play().catch(error => {
+                                console.error('Error playing audio:', error);
+                                playButton.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
+                                card.classList.remove('playing');
+                            });
                             playButton.innerHTML = '<i class="fas fa-pause"></i> Pause';
                             card.classList.add('playing');
                         } else {
@@ -4217,27 +4237,69 @@
                             }
                         }
                         
-                        // Play new track
-                        currentAudio = new Audio(track.file);
-                        currentCard = card;
-                        currentAudio.play();
-                        playButton.innerHTML = '<i class="fas fa-pause"></i> Pause';
-                        card.classList.add('playing');
+                        // Play new track with improved error handling
+                        playButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
                         
-                        // Update progress
-                        currentAudio.addEventListener('timeupdate', function() {
-                            const progress = (currentAudio.currentTime / currentAudio.duration) * 100;
-                            progressBar.style.width = progress + '%';
-                        });
-                        
-                        // Reset when ended
-                        currentAudio.addEventListener('ended', function() {
-                            playButton.innerHTML = '<i class="fas fa-play"></i> Play';
+                        try {
+                            currentAudio = new Audio();
+                            currentCard = card;
+                            
+                            // Set up error handling
+                            currentAudio.addEventListener('error', function(e) {
+                                console.error('Audio loading error:', e, 'File:', track.file);
+                                playButton.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
+                                card.classList.remove('playing');
+                                
+                                // Try alternative path
+                                console.log('Attempting to load from alternative path...');
+                                const altPath = './' + track.file;
+                                currentAudio.src = altPath;
+                                currentAudio.load();
+                            });
+                            
+                            // Set up success handlers
+                            currentAudio.addEventListener('canplay', function() {
+                                console.log('Audio loaded successfully:', track.file);
+                                playButton.innerHTML = '<i class="fas fa-pause"></i> Pause';
+                                card.classList.add('playing');
+                            });
+                            
+                            currentAudio.addEventListener('loadstart', function() {
+                                console.log('Loading started for:', track.file);
+                            });
+                            
+                            // Update progress
+                            currentAudio.addEventListener('timeupdate', function() {
+                                const progress = (currentAudio.currentTime / currentAudio.duration) * 100;
+                                progressBar.style.width = progress + '%';
+                            });
+                            
+                            // Reset when ended
+                            currentAudio.addEventListener('ended', function() {
+                                playButton.innerHTML = '<i class="fas fa-play"></i> Play';
+                                card.classList.remove('playing');
+                                progressBar.style.width = '0%';
+                                currentAudio = null;
+                                currentCard = null;
+                            });
+                            
+                            // Set source and attempt to play
+                            currentAudio.src = track.file;
+                            currentAudio.load();
+                            
+                            currentAudio.play().then(() => {
+                                console.log('Playback started successfully');
+                            }).catch(error => {
+                                console.error('Playback failed:', error);
+                                playButton.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
+                                card.classList.remove('playing');
+                            });
+                            
+                        } catch (error) {
+                            console.error('Error creating audio element:', error);
+                            playButton.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
                             card.classList.remove('playing');
-                            progressBar.style.width = '0%';
-                            currentAudio = null;
-                            currentCard = null;
-                        });
+                        }
                     }
                 });
                 
