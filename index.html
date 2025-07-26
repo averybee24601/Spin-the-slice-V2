@@ -4226,15 +4226,26 @@
                             card.classList.remove('playing');
                         }
                     } else {
-                        // Stop previous track
+                        // Stop previous track and properly reset its UI
                         if (currentAudio) {
                             currentAudio.pause();
                             currentAudio.currentTime = 0;
                             if (currentCard) {
                                 currentCard.classList.remove('playing');
-                                currentCard.querySelector('.play-button').innerHTML = '<i class="fas fa-play"></i> Play';
-                                currentCard.querySelector('.progress-fill').style.width = '0%';
+                                const prevPlayButton = currentCard.querySelector('.play-button');
+                                const prevProgressBar = currentCard.querySelector('.progress-fill');
+                                prevPlayButton.innerHTML = '<i class="fas fa-play"></i> Play';
+                                prevProgressBar.style.width = '0%';
+                                
+                                // Remove all event listeners from previous audio
+                                currentAudio.removeEventListener('timeupdate', arguments.callee);
+                                currentAudio.removeEventListener('ended', arguments.callee);
+                                currentAudio.removeEventListener('error', arguments.callee);
+                                currentAudio.removeEventListener('canplay', arguments.callee);
+                                currentAudio.removeEventListener('loadstart', arguments.callee);
                             }
+                            currentAudio = null;
+                            currentCard = null;
                         }
                         
                         // Play new track with improved error handling
@@ -4244,44 +4255,65 @@
                             currentAudio = new Audio();
                             currentCard = card;
                             
-                            // Set up error handling
-                            currentAudio.addEventListener('error', function(e) {
+                            // Create named functions for event handlers to allow proper cleanup
+                            const errorHandler = function(e) {
                                 console.error('Audio loading error:', e, 'File:', track.file);
-                                playButton.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
-                                card.classList.remove('playing');
+                                if (currentCard === card) { // Only update if this is still the current track
+                                    playButton.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
+                                    card.classList.remove('playing');
+                                }
                                 
                                 // Try alternative path
                                 console.log('Attempting to load from alternative path...');
                                 const altPath = './' + track.file;
                                 currentAudio.src = altPath;
                                 currentAudio.load();
-                            });
+                            };
                             
-                            // Set up success handlers
-                            currentAudio.addEventListener('canplay', function() {
+                            const canplayHandler = function() {
                                 console.log('Audio loaded successfully:', track.file);
-                                playButton.innerHTML = '<i class="fas fa-pause"></i> Pause';
-                                card.classList.add('playing');
-                            });
+                                if (currentCard === card) { // Only update if this is still the current track
+                                    playButton.innerHTML = '<i class="fas fa-pause"></i> Pause';
+                                    card.classList.add('playing');
+                                }
+                            };
                             
-                            currentAudio.addEventListener('loadstart', function() {
+                            const loadstartHandler = function() {
                                 console.log('Loading started for:', track.file);
-                            });
+                            };
                             
-                            // Update progress
-                            currentAudio.addEventListener('timeupdate', function() {
-                                const progress = (currentAudio.currentTime / currentAudio.duration) * 100;
-                                progressBar.style.width = progress + '%';
-                            });
+                            const timeupdateHandler = function() {
+                                if (currentCard === card && currentAudio) { // Only update if this is still the current track
+                                    const progress = (currentAudio.currentTime / currentAudio.duration) * 100;
+                                    progressBar.style.width = progress + '%';
+                                }
+                            };
                             
-                            // Reset when ended
-                            currentAudio.addEventListener('ended', function() {
-                                playButton.innerHTML = '<i class="fas fa-play"></i> Play';
-                                card.classList.remove('playing');
-                                progressBar.style.width = '0%';
-                                currentAudio = null;
-                                currentCard = null;
-                            });
+                            const endedHandler = function() {
+                                if (currentCard === card) { // Only update if this is still the current track
+                                    playButton.innerHTML = '<i class="fas fa-play"></i> Play';
+                                    card.classList.remove('playing');
+                                    progressBar.style.width = '0%';
+                                    currentAudio = null;
+                                    currentCard = null;
+                                }
+                            };
+                            
+                            // Set up event handlers
+                            currentAudio.addEventListener('error', errorHandler);
+                            currentAudio.addEventListener('canplay', canplayHandler);
+                            currentAudio.addEventListener('loadstart', loadstartHandler);
+                            currentAudio.addEventListener('timeupdate', timeupdateHandler);
+                            currentAudio.addEventListener('ended', endedHandler);
+                            
+                            // Store handlers for cleanup (attach to audio element)
+                            currentAudio._handlers = {
+                                error: errorHandler,
+                                canplay: canplayHandler,
+                                loadstart: loadstartHandler,
+                                timeupdate: timeupdateHandler,
+                                ended: endedHandler
+                            };
                             
                             // Set source and attempt to play
                             currentAudio.src = track.file;
