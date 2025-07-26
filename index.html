@@ -4238,11 +4238,13 @@
                                 prevProgressBar.style.width = '0%';
                                 
                                 // Remove all event listeners from previous audio
-                                currentAudio.removeEventListener('timeupdate', arguments.callee);
-                                currentAudio.removeEventListener('ended', arguments.callee);
-                                currentAudio.removeEventListener('error', arguments.callee);
-                                currentAudio.removeEventListener('canplay', arguments.callee);
-                                currentAudio.removeEventListener('loadstart', arguments.callee);
+                                if (currentAudio._handlers) {
+                                    currentAudio.removeEventListener('error', currentAudio._handlers.error);
+                                    currentAudio.removeEventListener('canplay', currentAudio._handlers.canplay);
+                                    currentAudio.removeEventListener('loadstart', currentAudio._handlers.loadstart);
+                                    currentAudio.removeEventListener('timeupdate', currentAudio._handlers.timeupdate);
+                                    currentAudio.removeEventListener('ended', currentAudio._handlers.ended);
+                                }
                             }
                             currentAudio = null;
                             currentCard = null;
