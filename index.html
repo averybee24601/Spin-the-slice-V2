@@ -1246,46 +1246,116 @@
         }
 
         .leaderboard-entry {
-            background: rgba(10, 10, 30, 0.9);
-            border: 2px solid var(--neon-yellow);
-            border-radius: 12px;
-            padding: 15px;
+            background: 
+                radial-gradient(ellipse at top left, rgba(255, 0, 128, 0.1) 0%, transparent 40%),
+                radial-gradient(ellipse at bottom right, rgba(0, 255, 255, 0.1) 0%, transparent 40%),
+                linear-gradient(135deg, rgba(10, 10, 30, 0.95) 0%, rgba(20, 10, 40, 0.9) 100%);
+            border: 2px solid transparent;
+            border-radius: 15px;
+            padding: 20px;
             display: flex;
             align-items: center;
-            gap: 15px;
-            transition: all 0.3s ease;
+            gap: 20px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
             box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.3),
                 0 0 20px rgba(255, 255, 0, 0.2),
-                inset 0 0 20px rgba(255, 255, 0, 0.05);
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .leaderboard-entry::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, 
+                var(--neon-yellow), 
+                var(--neon-cyan), 
+                var(--neon-pink),
+                var(--neon-yellow));
+            border-radius: 15px;
+            z-index: -1;
+            opacity: 0.6;
+            animation: borderFlow 3s linear infinite;
         }
 
         .leaderboard-entry:hover {
-            border-color: var(--neon-pink);
+            transform: translateY(-5px) scale(1.02);
             box-shadow:
-                0 0 30px rgba(255, 0, 128, 0.3),
-                inset 0 0 30px rgba(255, 0, 128, 0.1);
-            transform: translateY(-2px);
+                0 15px 40px rgba(0, 0, 0, 0.4),
+                0 0 40px rgba(255, 0, 128, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .leaderboard-entry:hover::before {
+            opacity: 0.8;
+            animation-duration: 1s;
+        }
+
+        @keyframes borderFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         .leaderboard-rank {
             font-family: 'Orbitron', monospace;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             font-weight: 900;
-            min-width: 30px;
+            min-width: 60px;
             text-align: center;
             color: var(--neon-yellow);
             text-shadow:
-                0 0 5px currentColor,
-                0 0 10px rgba(255, 255, 0, 0.4);
+                0 0 8px currentColor,
+                0 0 16px rgba(255, 255, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .rank-icon {
+            font-size: 1.5rem;
+            filter: drop-shadow(0 0 10px currentColor);
+        }
+
+        .rank-gold {
+            color: #FFD700;
+            text-shadow:
+                0 0 10px #FFD700,
+                0 0 20px #FFA500;
+        }
+
+        .rank-silver {
+            color: #C0C0C0;
+            text-shadow:
+                0 0 10px #C0C0C0,
+                0 0 20px #FFFFFF;
+        }
+
+        .rank-bronze {
+            color: #CD7F32;
+            text-shadow:
+                0 0 10px #CD7F32,
+                0 0 20px #FF8C00;
         }
 
         .leaderboard-avatar {
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
-            border: 2px solid var(--neon-yellow);
+            border: 3px solid var(--neon-cyan);
             overflow: hidden;
             flex-shrink: 0;
+            position: relative;
+            box-shadow:
+                0 0 20px rgba(0, 255, 255, 0.5),
+                inset 0 0 20px rgba(0, 255, 255, 0.1);
         }
 
         .leaderboard-avatar img {
@@ -1294,31 +1364,99 @@
             object-fit: cover;
         }
 
+        .avatar-glow {
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            border-radius: 50%;
+            background: conic-gradient(
+                from 0deg,
+                var(--neon-cyan),
+                var(--neon-pink),
+                var(--neon-green),
+                var(--neon-cyan)
+            );
+            z-index: -1;
+            animation: avatarRotate 4s linear infinite;
+            opacity: 0.7;
+        }
+
+        @keyframes avatarRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .leaderboard-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
         .leaderboard-name {
             font-family: 'Orbitron', monospace;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
+            font-weight: 600;
             color: white;
-            flex: 1;
             text-shadow:
-                0 0 5px rgba(255, 255, 255, 0.5),
-                0 0 10px rgba(0, 255, 255, 0.3);
+                0 0 8px rgba(255, 255, 255, 0.8),
+                0 0 16px rgba(0, 255, 255, 0.4);
+        }
+
+        .leaderboard-details {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .last-win {
+            font-size: 0.9rem;
+            color: var(--neon-green);
+            text-shadow: 0 0 6px currentColor;
+            font-weight: 500;
+        }
+
+        .win-date {
+            font-size: 0.8rem;
+            color: var(--neon-purple);
+            text-shadow: 0 0 4px currentColor;
+            opacity: 0.8;
         }
 
         .leaderboard-wins {
-            background: rgba(255, 255, 0, 0.1);
-            border: 1px solid var(--neon-yellow);
-            border-radius: 20px;
-            padding: 5px 15px;
+            background: 
+                linear-gradient(135deg, rgba(255, 255, 0, 0.15) 0%, rgba(0, 255, 255, 0.1) 100%);
+            border: 2px solid var(--neon-yellow);
+            border-radius: 15px;
+            padding: 12px 20px;
             font-family: 'Orbitron', monospace;
-            font-size: 0.9rem;
             color: var(--neon-yellow);
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 5px;
+            text-align: center;
+            min-width: 80px;
+            box-shadow:
+                0 0 20px rgba(255, 255, 0, 0.3),
+                inset 0 0 20px rgba(255, 255, 0, 0.1);
         }
 
-        .leaderboard-wins i {
-            font-size: 0.8rem;
+        .wins-count {
+            font-size: 1.8rem;
+            font-weight: 900;
+            line-height: 1;
+            text-shadow:
+                0 0 10px currentColor,
+                0 0 20px rgba(255, 255, 0, 0.6);
+        }
+
+        .wins-label {
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            opacity: 0.8;
+            margin-top: 2px;
         }
 
         .players-toggle {
@@ -3136,14 +3274,33 @@
             leaderboard.forEach((player, index) => {
                 const entry = document.createElement('div');
                 entry.className = 'leaderboard-entry';
+                
+                // Get rank styling
+                const rankClass = index === 0 ? 'rank-gold' : index === 1 ? 'rank-silver' : index === 2 ? 'rank-bronze' : '';
+                const rankIcon = index === 0 ? '👑' : index === 1 ? '🥈' : index === 2 ? '🥉' : '🍕';
+                
+                // Format last win date
+                const lastWinDate = player.winDate ? new Date(player.winDate).toLocaleDateString() : 'Unknown';
+                
                 entry.innerHTML = `
-                    <div class="leaderboard-rank">#${index + 1}</div>
+                    <div class="leaderboard-rank ${rankClass}">
+                        <span class="rank-icon">${rankIcon}</span>
+                        #${index + 1}
+                    </div>
                     <div class="leaderboard-avatar">
                         <img src="${player.avatar}" alt="${player.name}">
+                        <div class="avatar-glow"></div>
                     </div>
-                    <div class="leaderboard-name">${player.name}</div>
+                    <div class="leaderboard-info">
+                        <div class="leaderboard-name">${player.name}</div>
+                        <div class="leaderboard-details">
+                            <div class="last-win">🍕 ${player.lastWin || 'Classic Slice'}</div>
+                            <div class="win-date">📅 ${lastWinDate}</div>
+                        </div>
+                    </div>
                     <div class="leaderboard-wins">
-                        <i class="fas fa-crown"></i> ${player.wins}
+                        <div class="wins-count">${player.wins}</div>
+                        <div class="wins-label">WINS</div>
                     </div>
                 `;
                 leaderboardGrid.appendChild(entry);
@@ -3151,19 +3308,28 @@
         }
 
         // Add win to player
-        function addWinToPlayer(playerName, avatarDataUrl) {
+        function addWinToPlayer(playerName, avatarDataUrl, winningSlice) {
             let leaderboard = JSON.parse(localStorage.getItem(LEADERBOARD_STORAGE_KEY)) || [];
             const playerIndex = leaderboard.findIndex(p => p.name === playerName);
 
             if (playerIndex >= 0) {
-                // Player exists, increment wins
+                // Player exists, increment wins and track slices
                 leaderboard[playerIndex].wins += 1;
+                leaderboard[playerIndex].lastWin = winningSlice;
+                leaderboard[playerIndex].winDate = new Date().toISOString();
+                if (!leaderboard[playerIndex].slicesWon) {
+                    leaderboard[playerIndex].slicesWon = [];
+                }
+                leaderboard[playerIndex].slicesWon.push(winningSlice);
             } else {
                 // New player
                 leaderboard.push({
                     name: playerName,
                     wins: 1,
-                    avatar: avatarDataUrl
+                    avatar: avatarDataUrl,
+                    lastWin: winningSlice,
+                    winDate: new Date().toISOString(),
+                    slicesWon: [winningSlice]
                 });
             }
 
@@ -3172,15 +3338,18 @@
             updateLeaderboardDisplay(leaderboard);
         }
 
-        // Bonus toppings for Cheese and Pep Pie - RESTRICTED TO MEATS/PINEAPPLE
-        const bonusToppings = [
-            "Pepperoni", "Mushrooms", "Onions", "Sausage", "Bacon", "Extra Cheese",
-            "Black Olives", "Green Peppers", "Pineapple", "Jalapeños", "Sun-dried Tomatoes",
-            "Feta Cheese", "Prosciutto", "Artichokes"
+        // Realistic meat toppings for Cheese and Pepperoni slices
+        const meatToppings = [
+            "Sausage", "Canadian Bacon", "Beef", "Chicken"
         ];
 
-        // Meats list for Gravy Pizza logic
-        const meatToppings = ["Pepperoni", "Sausage", "Bacon", "Ham", "Chicken", "Beef"];
+        // Alternative sauces for variety
+        const sauceOptions = [
+            "Chicken Alfredo", "BBQ Sauce", "Gravy"
+        ];
+
+        // Gravy Pizza meat options
+        const gravyMeats = ["Sausage", "Beef", "Chicken", "Sausage", "Bacon", "Ham", "Chicken", "Beef"];
 
         let players = [];
         let wheelSpinning = false;
@@ -3724,6 +3893,12 @@
                 viewLeaderboard.addEventListener('click', function () {
                     cameraModal.style.display = 'none';
                     stopCamera();
+                    // Close any open popups first
+                    const resultPopup = document.getElementById('resultPopup');
+                    const overlay = document.getElementById('overlay');
+                    if (resultPopup) resultPopup.classList.remove('active');
+                    if (overlay) overlay.classList.remove('active');
+                    
                     // Scroll to leaderboard and open it
                     const leaderboardDock = document.getElementById('leaderboardDock');
                     if (leaderboardDock) {
@@ -3829,15 +4004,33 @@
             cheesePull.classList.add('active');
             setTimeout(() => cheesePull.classList.remove('active'), 2000);
 
-            // Apply bonus topping logic
+            // Apply realistic slice logic with proper naming
             winningSliceWithTopping = winningSlice;
-            if (winningSlice === "Cheese Pie" || winningSlice === "Pep Pie") {
-                const randomTopping = bonusToppings[Math.floor(Math.random() * bonusToppings.length)];
-                winningSliceWithTopping = `${winningSlice} + ${randomTopping}`;
-            }
-            if (winningSlice === "Gravy Pizza") {
-                const randomMeat = meatToppings[Math.floor(Math.random() * meatToppings.length)];
-                winningSliceWithTopping = `${winningSlice} + ${randomMeat}`;
+            
+            if (winningSlice === "Cheese Pie") {
+                // 50% chance for extra meat, 50% chance for sauce variety
+                if (Math.random() < 0.5) {
+                    const randomMeat = meatToppings[Math.floor(Math.random() * meatToppings.length)];
+                    winningSliceWithTopping = `Cheese & ${randomMeat}`;
+                } else {
+                    const randomSauce = sauceOptions[Math.floor(Math.random() * sauceOptions.length)];
+                    winningSliceWithTopping = `${randomSauce} Cheese`;
+                }
+            } else if (winningSlice === "Pep Pie") {
+                // 50% chance for extra meat, 50% chance for sauce variety  
+                if (Math.random() < 0.5) {
+                    const randomMeat = meatToppings[Math.floor(Math.random() * meatToppings.length)];
+                    winningSliceWithTopping = `Pepperoni & ${randomMeat}`;
+                } else {
+                    const randomSauce = sauceOptions[Math.floor(Math.random() * sauceOptions.length)];
+                    winningSliceWithTopping = `${randomSauce} Pepperoni`;
+                }
+            } else if (winningSlice === "Gravy Pizza") {
+                const randomMeat = gravyMeats[Math.floor(Math.random() * gravyMeats.length)];
+                winningSliceWithTopping = `Gravy ${randomMeat}`;
+            } else {
+                // Remove "Pie" from other pizzas and make them sound like slices
+                winningSliceWithTopping = winningSlice.replace(' Pie', '').replace('Pizza', '').trim();
             }
 
             // Play result sound
@@ -3992,7 +4185,7 @@
 
                 // Save to leaderboard if player won
                 if (winners.length > 0) {
-                    addWinToPlayer(winnerName, url);
+                    addWinToPlayer(winnerName, url, winningSliceWithTopping);
                 }
             }, 'image/png');
 
